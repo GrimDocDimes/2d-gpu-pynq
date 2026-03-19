@@ -1,0 +1,21 @@
+# Vivado
+*.log
+*.jou
+*.str
+*.zip
+*.xpr
+*.cache/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/
+*.srcs/
+*.gen/
+*.tmp/
+*.xil/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
