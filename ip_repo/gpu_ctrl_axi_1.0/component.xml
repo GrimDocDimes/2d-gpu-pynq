@@ -194,18 +194,20 @@
     </spirit:parameter>
   </spirit:parameters>
 
-  <!-- ===== Vivado Extensions ===== -->
-  <xilinx:coreExtensions>
-    <xilinx:displayName>GPU Control AXI</xilinx:displayName>
-    <xilinx:vendorDisplayName>GrimDocDimes</xilinx:vendorDisplayName>
-    <xilinx:lifecycleStatus>Production</xilinx:lifecycleStatus>
-    <xilinx:taxonomies>
-      <xilinx:taxonomy>/AXI_Peripheral</xilinx:taxonomy>
-    </xilinx:taxonomies>
-    <xilinx:supportedFamilies>
-      <xilinx:family xilinx:lifeCycle="Production">zynq</xilinx:family>
-    </xilinx:supportedFamilies>
-    <xilinx:xguiTopFile>xgui/gpu_ctrl_axi_v1_0.tcl</xilinx:xguiTopFile>
-  </xilinx:coreExtensions>
+  <!-- ===== Vivado Extensions — must be inside spirit:vendorExtensions ===== -->
+  <spirit:vendorExtensions>
+    <xilinx:coreExtensions>
+      <xilinx:displayName>GPU Control AXI</xilinx:displayName>
+      <xilinx:vendorDisplayName>GrimDocDimes</xilinx:vendorDisplayName>
+      <xilinx:lifecycleStatus>Production</xilinx:lifecycleStatus>
+      <xilinx:taxonomies>
+        <xilinx:taxonomy>/AXI_Peripheral</xilinx:taxonomy>
+      </xilinx:taxonomies>
+      <xilinx:supportedFamilies>
+        <xilinx:family xilinx:lifeCycle="Production">zynq</xilinx:family>
+      </xilinx:supportedFamilies>
+      <xilinx:xguiTopFile>xgui/gpu_ctrl_axi_v1_0.tcl</xilinx:xguiTopFile>
+    </xilinx:coreExtensions>
+  </spirit:vendorExtensions>
 
 </spirit:component>
