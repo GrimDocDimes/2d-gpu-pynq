@@ -4,6 +4,10 @@
 *.str
 *.zip
 *.xpr
+*.xsa
+*.bit
+*.hwh
+gpu_project/
 *.cache/
 *.hw/
 *.ip_user_files/
@@ -13,6 +17,10 @@
 *.gen/
 *.tmp/
 *.xil/
+
+# Simulation outputs
+sim/*.vcd
+sim/*.out
 
 # Python
 __pycache__/

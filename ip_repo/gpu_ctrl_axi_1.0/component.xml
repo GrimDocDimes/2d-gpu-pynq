@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spirit:component
+  xmlns:xilinx="http://www.xilinx.com"
+  xmlns:spirit="http://www.spiritconsortium.org/XMLSchema/SPIRIT/1685-2009"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <!-- =========================================================================
+       IP Identity
+       ========================================================================= -->
+  <spirit:vendor>grimdocdimes.com</spirit:vendor>
+  <spirit:library>user</spirit:library>
+  <spirit:name>gpu_ctrl_axi</spirit:name>
+  <spirit:version>1.0</spirit:version>
+  <spirit:description>
+    AXI4-Lite slave register file for the 2D GPU Accelerator.
+    Exposes 8 × 32-bit control/status registers to the ARM PS.
+    Generates draw commands and IRQ to the PL drawing engine.
+  </spirit:description>
+
+  <!-- =========================================================================
+       Bus Interfaces
+       ========================================================================= -->
+  <spirit:busInterfaces>
+
+    <!-- AXI4-Lite Slave Interface -->
+    <spirit:busInterface>
+      <spirit:name>S_AXI</spirit:name>
+      <spirit:busType spirit:vendor="xilinx.com" spirit:library="interface"
+                      spirit:name="aximm" spirit:version="1.0"/>
+      <spirit:abstractionType spirit:vendor="xilinx.com" spirit:library="interface"
+                              spirit:name="aximm_rtl" spirit:version="1.0"/>
+      <spirit:slave/>
+      <spirit:portMaps>
+        <spirit:portMap><spirit:logicalPort><spirit:name>AWADDR</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_awaddr</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>AWPROT</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_awprot</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>AWVALID</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_awvalid</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>AWREADY</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_awready</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>WDATA</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_wdata</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>WSTRB</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_wstrb</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>WVALID</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_wvalid</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>WREADY</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_wready</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>BRESP</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_bresp</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>BVALID</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_bvalid</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>BREADY</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_bready</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>ARADDR</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_araddr</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>ARPROT</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_arprot</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>ARVALID</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_arvalid</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>ARREADY</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_arready</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>RDATA</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_rdata</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>RRESP</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_rresp</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>RVALID</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_rvalid</spirit:name></spirit:physicalPort></spirit:portMap>
+        <spirit:portMap><spirit:logicalPort><spirit:name>RREADY</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_rready</spirit:name></spirit:physicalPort></spirit:portMap>
+      </spirit:portMaps>
+      <spirit:parameters>
+        <spirit:parameter>
+          <spirit:name>DATA_WIDTH</spirit:name><spirit:value>32</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>ADDR_WIDTH</spirit:name><spirit:value>5</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>PROTOCOL</spirit:name><spirit:value>AXI4LITE</spirit:value>
+        </spirit:parameter>
+      </spirit:parameters>
+    </spirit:busInterface>
+
+    <!-- AXI4-Lite Clock Interface -->
+    <spirit:busInterface>
+      <spirit:name>S_AXI_CLK</spirit:name>
+      <spirit:busType spirit:vendor="xilinx.com" spirit:library="signal"
+                      spirit:name="clock" spirit:version="1.0"/>
+      <spirit:abstractionType spirit:vendor="xilinx.com" spirit:library="signal"
+                              spirit:name="clock_rtl" spirit:version="1.0"/>
+      <spirit:slave/>
+      <spirit:portMaps>
+        <spirit:portMap><spirit:logicalPort><spirit:name>CLK</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_aclk</spirit:name></spirit:physicalPort></spirit:portMap>
+      </spirit:portMaps>
+      <spirit:parameters>
+        <spirit:parameter>
+          <spirit:name>ASSOCIATED_BUSIF</spirit:name><spirit:value>S_AXI</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>ASSOCIATED_RESET</spirit:name><spirit:value>s_axi_aresetn</spirit:value>
+        </spirit:parameter>
+      </spirit:parameters>
+    </spirit:busInterface>
+
+    <!-- Reset Interface -->
+    <spirit:busInterface>
+      <spirit:name>S_AXI_RST</spirit:name>
+      <spirit:busType spirit:vendor="xilinx.com" spirit:library="signal"
+                      spirit:name="reset" spirit:version="1.0"/>
+      <spirit:abstractionType spirit:vendor="xilinx.com" spirit:library="signal"
+                              spirit:name="reset_rtl" spirit:version="1.0"/>
+      <spirit:slave/>
+      <spirit:portMaps>
+        <spirit:portMap><spirit:logicalPort><spirit:name>RST</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>s_axi_aresetn</spirit:name></spirit:physicalPort></spirit:portMap>
+      </spirit:portMaps>
+      <spirit:parameters>
+        <spirit:parameter>
+          <spirit:name>POLARITY</spirit:name><spirit:value>ACTIVE_LOW</spirit:value>
+        </spirit:parameter>
+      </spirit:parameters>
+    </spirit:busInterface>
+
+    <!-- Interrupt Output -->
+    <spirit:busInterface>
+      <spirit:name>interrupt</spirit:name>
+      <spirit:busType spirit:vendor="xilinx.com" spirit:library="signal"
+                      spirit:name="interrupt" spirit:version="1.0"/>
+      <spirit:abstractionType spirit:vendor="xilinx.com" spirit:library="signal"
+                              spirit:name="interrupt_rtl" spirit:version="1.0"/>
+      <spirit:master/>
+      <spirit:portMaps>
+        <spirit:portMap><spirit:logicalPort><spirit:name>INTERRUPT</spirit:name></spirit:logicalPort>
+          <spirit:physicalPort><spirit:name>interrupt</spirit:name></spirit:physicalPort></spirit:portMap>
+      </spirit:portMaps>
+    </spirit:busInterface>
+
+  </spirit:busInterfaces>
+
+  <!-- =========================================================================
+       Model: Source Files
+       ========================================================================= -->
+  <spirit:model>
+    <spirit:views>
+      <spirit:view>
+        <spirit:name>xilinx_verilogsynthesis</spirit:name>
+        <spirit:envIdentifier>:vivado.xilinx.com:synthesis</spirit:envIdentifier>
+        <spirit:language>Verilog</spirit:language>
+        <spirit:modelName>gpu_ctrl_axi_v1_0</spirit:modelName>
+        <spirit:fileSetRef><spirit:localName>xilinx_verilogsynthesis_view_fileset</spirit:localName></spirit:fileSetRef>
+      </spirit:view>
+      <spirit:view>
+        <spirit:name>xilinx_verilogsimulation</spirit:name>
+        <spirit:envIdentifier>:vivado.xilinx.com:simulation</spirit:envIdentifier>
+        <spirit:language>Verilog</spirit:language>
+        <spirit:modelName>gpu_ctrl_axi_v1_0</spirit:modelName>
+        <spirit:fileSetRef><spirit:localName>xilinx_verilogsimulation_view_fileset</spirit:localName></spirit:fileSetRef>
+      </spirit:view>
+      <spirit:view>
+        <spirit:name>xilinx_xpgui</spirit:name>
+        <spirit:envIdentifier>:vivado.xilinx.com:xgui.ui</spirit:envIdentifier>
+        <spirit:fileSetRef><spirit:localName>xilinx_xpgui_view_fileset</spirit:localName></spirit:fileSetRef>
+      </spirit:view>
+    </spirit:views>
+
+    <spirit:ports>
+      <!-- AXI4-Lite Slave ports -->
+      <spirit:port><spirit:name>s_axi_aclk</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_aresetn</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_awaddr</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction>
+          <spirit:vector><spirit:left>4</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_awprot</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction>
+          <spirit:vector><spirit:left>2</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_awvalid</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_awready</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_wdata</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction>
+          <spirit:vector><spirit:left>31</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_wstrb</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction>
+          <spirit:vector><spirit:left>3</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_wvalid</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_wready</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_bresp</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction>
+          <spirit:vector><spirit:left>1</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_bvalid</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_bready</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_araddr</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction>
+          <spirit:vector><spirit:left>4</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_arprot</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction>
+          <spirit:vector><spirit:left>2</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_arvalid</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_arready</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_rdata</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction>
+          <spirit:vector><spirit:left>31</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_rresp</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction>
+          <spirit:vector><spirit:left>1</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_rvalid</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>s_axi_rready</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction></spirit:wire></spirit:port>
+      <!-- User ports -->
+      <spirit:port><spirit:name>cmd_valid</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>cmd_type</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction>
+          <spirit:vector><spirit:left>1</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>cmd_x0</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction>
+          <spirit:vector><spirit:left>10</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>cmd_y0</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction>
+          <spirit:vector><spirit:left>10</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>cmd_x1</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction>
+          <spirit:vector><spirit:left>10</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>cmd_y1</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction>
+          <spirit:vector><spirit:left>10</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>cmd_color</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction>
+          <spirit:vector><spirit:left>15</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>cmd_fb_base</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction>
+          <spirit:vector><spirit:left>31</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>cmd_fb_stride</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction>
+          <spirit:vector><spirit:left>15</spirit:left><spirit:right>0</spirit:right></spirit:vector>
+        </spirit:wire></spirit:port>
+      <spirit:port><spirit:name>engine_busy</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>engine_done</spirit:name>
+        <spirit:wire><spirit:direction>in</spirit:direction></spirit:wire></spirit:port>
+      <spirit:port><spirit:name>interrupt</spirit:name>
+        <spirit:wire><spirit:direction>out</spirit:direction></spirit:wire></spirit:port>
+    </spirit:ports>
+
+    <spirit:fileSets>
+      <spirit:fileSet>
+        <spirit:name>xilinx_verilogsynthesis_view_fileset</spirit:name>
+        <spirit:file>
+          <spirit:name>hdl/gpu_ctrl_axi_v1_0.v</spirit:name>
+          <spirit:fileType>verilogSource</spirit:fileType>
+        </spirit:file>
+      </spirit:fileSet>
+      <spirit:fileSet>
+        <spirit:name>xilinx_verilogsimulation_view_fileset</spirit:name>
+        <spirit:file>
+          <spirit:name>hdl/gpu_ctrl_axi_v1_0.v</spirit:name>
+          <spirit:fileType>verilogSource</spirit:fileType>
+        </spirit:file>
+      </spirit:fileSet>
+      <spirit:fileSet>
+        <spirit:name>xilinx_xpgui_view_fileset</spirit:name>
+        <spirit:file>
+          <spirit:name>xgui/gpu_ctrl_axi_v1_0.tcl</spirit:name>
+          <spirit:fileType>tclSource</spirit:fileType>
+          <spirit:userFileType>CHECKSUM</spirit:userFileType>
+        </spirit:file>
+      </spirit:fileSet>
+    </spirit:fileSets>
+  </spirit:model>
+
+  <!-- =========================================================================
+       Parameters
+       ========================================================================= -->
+  <spirit:parameters>
+    <spirit:parameter>
+      <spirit:name>C_S_AXI_DATA_WIDTH</spirit:name>
+      <spirit:displayName>AXI Data Width</spirit:displayName>
+      <spirit:value spirit:format="long" spirit:minimum="32" spirit:maximum="32">32</spirit:value>
+    </spirit:parameter>
+    <spirit:parameter>
+      <spirit:name>C_S_AXI_ADDR_WIDTH</spirit:name>
+      <spirit:displayName>AXI Address Width</spirit:displayName>
+      <spirit:value spirit:format="long" spirit:minimum="5" spirit:maximum="5">5</spirit:value>
+    </spirit:parameter>
+  </spirit:parameters>
+
+  <!-- =========================================================================
+       Vivado-specific extensions
+       ========================================================================= -->
+  <xilinx:coreExtensions>
+    <xilinx:displayName>GPU Control AXI</xilinx:displayName>
+    <xilinx:vendorDisplayName>GrimDocDimes</xilinx:vendorDisplayName>
+    <xilinx:lifecycleStatus>Production</xilinx:lifecycleStatus>
+    <xilinx:taxonomies>
+      <xilinx:taxonomy>/AXI_Peripheral</xilinx:taxonomy>
+    </xilinx:taxonomies>
+    <xilinx:supportedFamilies>
+      <xilinx:family xilinx:lifeCycle="Production">zynq</xilinx:family>
+    </xilinx:supportedFamilies>
+    <xilinx:xguiTopFile>xgui/gpu_ctrl_axi_v1_0.tcl</xilinx:xguiTopFile>
+  </xilinx:coreExtensions>
+
+</spirit:component>
