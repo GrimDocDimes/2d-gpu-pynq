@@ -44,6 +44,13 @@ module pixel_addr_calc (
     reg [15:0] s1_color;
 
     // =========================================================================
+    // Stage 2 combinatorial intermediates (declared at module level for Verilog-2001)
+    // =========================================================================
+    reg [31:0] byte_offset;
+    reg [2:0]  beat_byte;
+    reg [31:0] aligned_addr;
+
+    // =========================================================================
     // Stage 0 → Stage 1: row offset multiplication
     // Vivado will infer a DSP48 for 11×16-bit multiply.
     // =========================================================================
@@ -72,10 +79,6 @@ module pixel_addr_calc (
             if (s1_valid) begin
                 // Byte offset of the pixel from start of framebuffer
                 // px * 2 = left-shift by 1 (RGB565, 2 bytes per pixel)
-                automatic reg [31:0] byte_offset;
-                automatic reg [2:0]  beat_byte;  // which byte within 8-byte beat
-                automatic reg [31:0] aligned_addr;
-
                 byte_offset  = s1_row_offset + {21'b0, s1_px, 1'b0};
                 beat_byte    = byte_offset[2:0];              // 0..7 within 64-bit beat
                 aligned_addr = fb_base + (byte_offset & ~32'h7); // 8-byte align
@@ -83,7 +86,6 @@ module pixel_addr_calc (
                 pixel_addr <= aligned_addr;
 
                 // Pack 16-bit color into correct byte lane of the 64-bit beat
-                // Using dynamic shift — Vivado synthesises well with barrel shifter
                 pixel_data <= {48'b0, s1_color} << {beat_byte, 3'b000};
 
                 // Two consecutive byte-enables for the 2-byte pixel

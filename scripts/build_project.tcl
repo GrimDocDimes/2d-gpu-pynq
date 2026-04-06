@@ -1,9 +1,9 @@
 # =============================================================================
 # build_project.tcl — Automated Vivado Block Design Builder
 # Project   : 2D GPU Accelerator for PYNQ-Z2
-# Vivado    : 2022.1+ (also tested 2023.1)
+# Vivado    : 2019.2+ (tested 2019.2, 2022.1, 2023.1)
 #
-# Usage:
+# Usage (run from the repo root OR from scripts/ directory):
 #   vivado -mode batch -source scripts/build_project.tcl
 #
 # Creates ./gpu_project/ with a complete block design and runs synthesis,
@@ -59,7 +59,7 @@ set_property -dict [list \
     CONFIG.PCW_USE_S_AXI_HP0 {1} \
     CONFIG.PCW_S_AXI_HP0_DATA_WIDTH {64} \
     CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ {100} \
-    CONFIG.PCW_FPGA1_PERIPHERAL_FREQMHZ {200} \
+    CONFIG.PCW_FPGA1_PERIPHERAL_FREQMHZ {148} \
     CONFIG.PCW_USE_FABRIC_INTERRUPT {1} \
     CONFIG.PCW_IRQ_F2P_INTR {1} \
 ] [get_bd_cells processing_system7_0]
@@ -70,6 +70,15 @@ connect_bd_net [get_bd_pins processing_system7_0/FCLK_CLK0] \
                [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
 connect_bd_net [get_bd_pins processing_system7_0/FCLK_RESET0_N] \
                [get_bd_pins proc_sys_reset_0/ext_reset_in]
+
+## ---- PS7 AXI port clocks (mandatory — must be driven by FCLK_CLK0) ----------
+# GP0 master clock (PS → PL control path)
+connect_bd_net [get_bd_pins processing_system7_0/FCLK_CLK0] \
+               [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK]
+# HP0 slave clock (drawing engine DDR write path)
+connect_bd_net [get_bd_pins processing_system7_0/FCLK_CLK0] \
+               [get_bd_pins processing_system7_0/S_AXI_HP0_ACLK]
+# NOTE: S_AXI_HP1_ACLK is connected below, after HP1 is enabled
 
 ## ---- AXI Interconnect (GP0 → GPU control registers) -----------------------
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_0
@@ -88,14 +97,14 @@ connect_bd_net [get_bd_pins proc_sys_reset_0/interconnect_aresetn] \
                [get_bd_pins axi_interconnect_0/M00_ARESETN]
 
 ## ---- GPU Control AXI IP -----------------------------------------------------
-create_bd_cell -type ip -vlnv grimdocdimes.com:user:gpu_ctrl_axi:1.0 gpu_ctrl_axi_0
+create_bd_cell -type ip -vlnv grimdocdimes.com:user:gpu_ctrl_axi_v1_0:1.0 gpu_ctrl_axi_0
 
 connect_bd_intf_net [get_bd_intf_pins axi_interconnect_0/M00_AXI] \
-                    [get_bd_intf_pins gpu_ctrl_axi_0/S_AXI]
+                    [get_bd_intf_pins gpu_ctrl_axi_0/s_axi]
 connect_bd_net [get_bd_pins processing_system7_0/FCLK_CLK0] \
-               [get_bd_pins gpu_ctrl_axi_0/S_AXI_ACLK]
+               [get_bd_pins gpu_ctrl_axi_0/s_axi_aclk]
 connect_bd_net [get_bd_pins proc_sys_reset_0/peripheral_aresetn] \
-               [get_bd_pins gpu_ctrl_axi_0/S_AXI_ARESETN]
+               [get_bd_pins gpu_ctrl_axi_0/s_axi_aresetn]
 
 ## ---- Drawing Engine (RTL module) -------------------------------------------
 create_bd_cell -type module -reference drawing_engine drawing_engine_0
@@ -168,6 +177,10 @@ set_property -dict [list CONFIG.NUM_SI {1} CONFIG.NUM_MI {1}] \
 set_property -dict [list CONFIG.PCW_USE_S_AXI_HP1 {1}] \
     [get_bd_cells processing_system7_0]
 
+# HP1 clock must be connected AFTER HP1 is enabled
+connect_bd_net [get_bd_pins processing_system7_0/FCLK_CLK0] \
+               [get_bd_pins processing_system7_0/S_AXI_HP1_ACLK]
+
 connect_bd_intf_net [get_bd_intf_pins axi_vdma_0/M_AXI_MM2S] \
                     [get_bd_intf_pins smartconnect_1/S00_AXI]
 connect_bd_intf_net [get_bd_intf_pins smartconnect_1/M00_AXI] \
@@ -179,26 +192,35 @@ connect_bd_net [get_bd_pins proc_sys_reset_0/peripheral_aresetn] \
 
 ## ---- Digilent rgb2dvi (HDMI TX) -------------------------------------------
 # Requires Digilent IP repo: https://github.com/Digilent/vivado-library
-# If not available, substitute with clocking wizard + OBUFDS for TMDS output.
-create_bd_cell -type ip -vlnv digilentinc.com:ip:rgb2dvi:1.4 rgb2dvi_0
+# If not installed, VDMA M_AXIS_MM2S is left unconnected (warning only).
+if { [catch {
+    create_bd_cell -type ip -vlnv digilentinc.com:ip:rgb2dvi:1.4 rgb2dvi_0
 
-connect_bd_intf_net [get_bd_intf_pins axi_vdma_0/M_AXIS_MM2S] \
-                    [get_bd_intf_pins rgb2dvi_0/RGB]
+    connect_bd_intf_net [get_bd_intf_pins axi_vdma_0/M_AXIS_MM2S] \
+                        [get_bd_intf_pins rgb2dvi_0/RGB]
 
-# Pixel clock from FCLK_CLK1 (configure PS to 148.5 MHz for 1080p or 74.25 MHz for 720p)
-connect_bd_net [get_bd_pins processing_system7_0/FCLK_CLK1] \
-               [get_bd_pins rgb2dvi_0/PixelClk]
+    # Pixel clock from FCLK_CLK1
+    connect_bd_net [get_bd_pins processing_system7_0/FCLK_CLK1] \
+                   [get_bd_pins rgb2dvi_0/PixelClk]
 
-# HDMI TX external ports
-make_bd_intf_pins_external [get_bd_intf_pins rgb2dvi_0/TMDS]
+    # HDMI TX external ports
+    make_bd_intf_pins_external [get_bd_intf_pins rgb2dvi_0/TMDS]
+
+    puts "INFO: Digilent rgb2dvi IP added successfully."
+} err] } {
+    puts "WARNING: Digilent rgb2dvi IP not found — HDMI TX skipped."
+    puts "WARNING: Install from https://github.com/Digilent/vivado-library and re-run."
+    puts "WARNING: M_AXIS_MM2S left unconnected — add HDMI TX manually in GUI."
+    # Do NOT make external — just leave M_AXIS_MM2S unconnected
+}
 
 ## ---- IRQ: GPU done → PS IRQ_F2P[0] ----------------------------------------
-connect_bd_net [get_bd_pins gpu_ctrl_axi_0/irq] \
+connect_bd_net [get_bd_pins gpu_ctrl_axi_0/interrupt] \
                [get_bd_pins processing_system7_0/IRQ_F2P]
 
 ## ---- Address Assignment -----------------------------------------------------
 # GPU control registers: 0x4300_0000 (64 KB)
-assign_bd_address [get_bd_addr_segs gpu_ctrl_axi_0/S_AXI/reg0]
+assign_bd_address [get_bd_addr_segs gpu_ctrl_axi_0/s_axi/reg0]
 set_property offset 0x43000000 \
     [get_bd_addr_segs processing_system7_0/Data/SEG_gpu_ctrl_axi_0_reg0]
 set_property range 64K \
@@ -247,14 +269,25 @@ if { [get_property PROGRESS [get_runs impl_1]] != "100%" } {
 set BIT_FILE "${PROJ_DIR}/${PROJ_NAME}.runs/impl_1/design_1_wrapper.bit"
 file copy -force $BIT_FILE ${PROJ_DIR}/gpu_accel.bit
 
-write_hw_platform -fixed -force \
-    -include_bit \
-    -file ${PROJ_DIR}/gpu_accel.xsa
+## write_hw_platform is Vivado 2020+; use write_hwdef for 2019.x
+set vivado_ver [version -short]
+if { [string match "2019.*" $vivado_ver] || [string match "2018.*" $vivado_ver] } {
+    write_hwdef -force -file ${PROJ_DIR}/gpu_accel.hdf
+    puts "INFO: Hardware definition written: ${PROJ_DIR}/gpu_accel.hdf"
+    puts "INFO: Extract the .hwh from the HDF using SDK or the Vitis HW export wizard."
+} else {
+    write_hw_platform -fixed -force -include_bit -file ${PROJ_DIR}/gpu_accel.xsa
+    puts "INFO: XSA written: ${PROJ_DIR}/gpu_accel.xsa"
+}
 
 puts ""
 puts "====================================================================="
 puts " Build complete!"
 puts " Bitstream : ${PROJ_DIR}/gpu_accel.bit"
-puts " HWH file  : Extract from ${PROJ_DIR}/gpu_accel.xsa"
-puts " Copy both to the PYNQ board at /home/xilinx/jupyter_notebooks/gpu/"
+if { [string match "2019.*" $vivado_ver] || [string match "2018.*" $vivado_ver] } {
+    puts " HDF file  : ${PROJ_DIR}/gpu_accel.hdf (extract .hwh inside)"
+} else {
+    puts " XSA file  : ${PROJ_DIR}/gpu_accel.xsa (contains .hwh)"
+}
+puts " Copy .bit + .hwh to: /home/xilinx/jupyter_notebooks/gpu/"
 puts "====================================================================="
